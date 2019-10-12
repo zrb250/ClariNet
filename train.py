@@ -61,15 +61,17 @@ if not os.path.isdir(os.path.join(args.save, args.model_name)):
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
+print("train model use device: " + device)
 
 # LOAD DATASETS
+print("LOAD DATASETS.....")
 train_dataset = LJspeechDataset(args.data_path, True, 0.1)
 test_dataset = LJspeechDataset(args.data_path, False, 0.1)
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn,
                           num_workers=args.num_workers, pin_memory=True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, collate_fn=collate_fn,
                          num_workers=args.num_workers, pin_memory=True)
-
+print("LOAD DATASETS COMPLETED .....")
 
 def build_model():
     model = Wavenet(out_channels=2,
@@ -90,7 +92,7 @@ def clone_as_averaged_model(model, ema):
     averaged_model.to(device)
     averaged_model.load_state_dict(model.state_dict())
 
-	for name, param in averaged_model.named_parameters():
+    for name, param in averaged_model.named_parameters():
         if name in ema.shadow:
             param.data = ema.shadow[name].clone().data
     return averaged_model
@@ -212,7 +214,7 @@ def load_checkpoint(step, model, optimizer, ema=None):
                 ema.register(name, param.data)
     return model, optimizer, ema
 
-
+print("start build_model.....")
 model = build_model()
 model.to(device)
 
@@ -242,6 +244,7 @@ else:
     list_loss = list_loss[:global_epoch]
     test_loss = np.min(list_loss)
 
+print("start epoch.....")
 for epoch in range(global_epoch + 1, args.epochs + 1):
     training_epoch_loss = train(epoch, model, optimizer, ema)
     with torch.no_grad():

@@ -42,9 +42,11 @@ parser.add_argument('--index', type=int, default=0, help='Index')
 args = parser.parse_args()
 
 # set gpu device
-os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+torch.cuda.set_device(7)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
+print("train model use device: " + ("cuda" if use_cuda else "cpu"))
 
 if not os.path.isdir(args.sample_path):
     os.makedirs(args.sample_path)

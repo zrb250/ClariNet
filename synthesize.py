@@ -91,7 +91,11 @@ model.to(device)
 
 model.eval()
 
+# set synthesize number
+cnt = 0;
 for i, (x, y, c, _) in enumerate(test_loader):
+    if cnt > 10:
+        break;
     if i < args.num_samples:
         x, c = x.to(device), c.to(device)
 
@@ -107,5 +111,7 @@ for i, (x, y, c, _) in enumerate(test_loader):
         wav = y_gen.numpy()
         wav_name = '{}/{}/generate_{}_{}.wav'.format(args.sample_path, args.model_name, step, i)
         librosa.output.write_wav(wav_name, wav, sr=22050)
+        cnt = cnt + 1;
+
         del y_gen
 

@@ -41,8 +41,12 @@ parser.add_argument('--num_workers', type=int, default=1, help='Number of worker
 
 args = parser.parse_args()
 
+# set gpu device
+#os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+torch.cuda.set_device(7)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
+print("train model use device: " + ("cuda" if use_cuda else "cpu"))
 
 if not os.path.isdir(args.sample_path):
     os.makedirs(args.sample_path)
@@ -110,7 +114,11 @@ model_s.eval()
 print('remove_weight_norm')
 model_s.remove_weight_norm()
 
+# set synthesize number
+cnt = 0;
 for i, (x, y, c, l) in enumerate(test_loader):
+    if cnt > 10:
+        break;
     if i < args.num_samples:
         x, y, c = x.to(device), y.to(device), c.to(device)
         print(x.size())
@@ -139,5 +147,6 @@ for i, (x, y, c, l) in enumerate(test_loader):
                                                            i,
                                                            args.temp)
         librosa.output.write_wav(wav_name, wav, sr=22050)
+        cnt = cnt + 1
         print('{} Saved!'.format(wav_name))
 

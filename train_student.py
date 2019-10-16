@@ -69,10 +69,14 @@ if not os.path.isdir(os.path.join(args.sample_path, args.teacher_name, args.mode
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
+print("train model use device: " + ("cuda" if use_cuda else "cpu"))
+
 
 # LOAD DATASETS
+print("LOAD DATASETS.....")
 train_dataset = LJspeechDataset(args.data_path, True, 0.1)
 test_dataset = LJspeechDataset(args.data_path, False, 0.1)
+print("LOAD DATASETS COMPLETED .....")
 
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn,
                           num_workers=args.num_workers, pin_memory=True)
@@ -109,7 +113,7 @@ def clone_as_averaged_model(model_s, ema):
         averaged_model = torch.nn.DataParallel(averaged_model)
     averaged_model.load_state_dict(model_s.state_dict())
 
-	for name, param in averaged_model.named_parameters():
+    for name, param in averaged_model.named_parameters():
         if name in ema.shadow:
             param.data = ema.shadow[name].clone().data
     return averaged_model

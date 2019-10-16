@@ -61,7 +61,7 @@ if not os.path.isdir(os.path.join(args.save, args.model_name)):
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
-print("train model use device: " + device)
+print("train model use device: " + ("cuda" if use_cuda else "cpu"))
 
 # LOAD DATASETS
 print("LOAD DATASETS.....")

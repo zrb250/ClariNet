@@ -67,6 +67,7 @@ if not os.path.isdir(os.path.join(args.sample_path, args.teacher_name)):
 if not os.path.isdir(os.path.join(args.sample_path, args.teacher_name, args.model_name)):
     os.makedirs(os.path.join(args.sample_path, args.teacher_name, args.model_name))
 
+torch.cuda.set_device(2)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 print("train model use device: " + ("cuda" if use_cuda else "cpu"))
@@ -335,13 +336,14 @@ teacher_step = args.teacher_load_step
 path = os.path.join(args.load, args.teacher_name, "checkpoint_step{:09d}_ema.pth".format(teacher_step))
 model_t = build_model()
 model_t = load_teacher_checkpoint(path, model_t)
+print("load completed....")
 model_s = build_student()
 
 model_t.to(device)
 model_s.to(device)
-if args.num_gpu > 1:
+#if args.num_gpu > 1:
     #model_t = torch.nn.DataParallel(model_t)
-    model_s = torch.nn.DataParallel(model_s)
+   ## model_s = torch.nn.DataParallel(model_s)
 
 optimizer = optim.Adam(model_s.parameters(), lr=args.learning_rate)
 criterion_t = KL_Loss()
@@ -373,6 +375,7 @@ else:
     list_loss = list_loss[:global_epoch]
     test_loss = np.min(list_loss)
 
+print("start to train model.....")
 for epoch in range(global_epoch + 1, args.epochs + 1):
     training_epoch_loss = train(epoch, model_t, model_s, optimizer, ema)
     with torch.no_grad():
